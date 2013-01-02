@@ -1,11 +1,15 @@
 __module_name__ = "GarGUI"
-__module_version__ = "1.1.0"
+__module_version__ = "1.2.1"
 __module_description__ = "A GUI Front-End for Gargoyle"
 
+version = 121
+
 import wx, xchat, string, os, sys, ConfigParser
+from urllib2 import urlopen
 
 # Fix path to load GUI
 path = os.path.dirname(os.path.abspath(__file__))
+path2 = path
 path = "".join([path, "/Gar"])
 sys.path.append(path)
 
@@ -106,16 +110,19 @@ class SimpleWindow(Simple):
        setcfg = self.initDieValue.GetValue()
        diceCFG.set("dice", "init", setcfg)
        xchat.command("savecfg")
+       iDie = setcfg
 
    def hitDieEdit(self, event):
        setcfg = self.hitDieValue.GetValue()
        diceCFG.set("dice", "hit", setcfg)
        xchat.command("savecfg")
+       hDie = setcfg
    
    def attackDieEdit(self, event):
        setcfg = self.attackDieValue.GetValue()
        diceCFG.set("dice", "attack", setcfg)
        xchat.command("savecfg")
+       aDie = setcfg
    
    def attackButtonClick(self, event):
        try:
@@ -148,7 +155,7 @@ class SimpleWindow(Simple):
        wx.MessageBox("GarGUI " + __module_version__ + "\n\nGarGUI is a front-end for the IRC bot \"Gargoyle\" by CyberXZT.  GarGUI attempts to make the usage of Gargoyle easier by the simplification of the !val command to simple GUI buttons.  \nModes exist in GarGUI to utilize it in different ways.  The normal GUI is the most simple having just a few button for rolling Initiative, Hit Chance, and Attack.  The \"Advanced\" GUI allows users to fully modify each roll, with the ability to have a few common dice as quick settings.\n\n GarGUI is licensed unded the GNU GPL v3.  The full terms of this license can be found in the \"LICENSE\" file in GarGUI's directory.", "About", wx.OK | wx.ICON_INFORMATION)
    
    def initButtonClick(self, event):
-       if not "+" or "-" in iDie:
+       if not "+" and "-" in iDie:
            roller = " !val %roll:" + iDie + "%"
            xchat.command(command + roller)
        else:
@@ -170,6 +177,21 @@ def showGUI(word, word_eol, userdata):
                app.SetTopWindow(frame_1)
                frame_1.Show()
                app.MainLoop()
+           if word[1] == "update":
+               latest = urlopen("http://xvicario.us/gar/latest")
+               latest = int(latest.read())
+               if version == latest:
+                   xchat.prnt("GarGUI: No Updates Found...")
+               elif version < latest:
+                   xchat.prnt("GarGUI: Update Found... Downloading.")
+                   garLatest = urlopen("http://xvicario.us/gar/GarGUI.py")
+                   xchat.prnt("GarGUI: Downloaded... Applying Update.")
+                   garLatest = garLatest.read()
+                   GarGUI = open(path2 + "/GarGUI.py", "w")
+                   GarGUI.write(garLatest)
+                   GarGUI.close()
+                   xchat.prnt("GarGUI: Updated... Unloading module.  Please load GarGUI to finish the update.")
+                   xchat.command("py unload GarGUI")
        except IndexError:
            frame_1 = SimpleWindow(None, -1, "")
            app.SetTopWindow(frame_1)
