@@ -4,6 +4,7 @@ __module_description__ = "A Gargoyle GUI Front-end"
 
 import wx, xchat, string, os, sys, ConfigParser
 
+# Fix path to load GUI
 path = os.path.dirname(os.path.abspath(__file__))
 path = "".join([path, "/Gar"])
 sys.path.append(path)
@@ -14,8 +15,15 @@ from GarAdvanced import Advanced
 print "\0034>>>>>",__module_name__, __module_version__, "has been loaded <<<<<\003"
 print "Welcome to the GarGUI Suite.  GarGUI is a GUI front-end for the IRC RPG bot Gargoyle.  For help please ask XVicarious for now because there is no manual yet!"
 
+# Read the configuration
 diceCFG = ConfigParser.RawConfigParser()
 diceCFG.read(path + "/dice.gar")
+iDie = diceCFG.get("dice", "init")
+hDie = diceCFG.get("dice", "hit")
+aDie = diceCFG.get("dice", "attack")
+
+# Extra variables to make life easier
+command = "msg " + xchat.get_info("channel")
 
 class AdvancedWindow(Advanced):
     
@@ -30,32 +38,32 @@ class AdvancedWindow(Advanced):
        self.commonDie3.Bind(wx.EVT_BUTTON, self.commonButton3)
        
    def commonButton1(self, event):
-       xchat.command(" ".join(["msg", xchat.get_info("channel"), "!val %roll:1d4%"]))
+       xchat.command(command + " !val %roll:1d4%")
        
    def commonButton2(self, event):
-       xchat.command(" ".join(["msg", xchat.get_info("channel"), "!val %roll:1d6%"]))
+       xchat.command(command + " !val %roll:1d6%")
        
    def commonButton3(self, event):
-       xchat.command(" ".join(["msg", xchat.get_info("channel"), "!val %roll:1d20%"]))
+       xchat.command(command + " !val %roll:1d20%")
 
    def rollAdv(self, event):
        numDie = self.numberOfDice.GetValue()
        diceSize = self.dieSize.GetValue()
        modifier = self.modifierAddition.GetValue()
        if not "+" and "-" in modifier:
-           modifier = "".join(["+", modifier])
+           modifier = "+" + modifier
            xchat.prnt("You failed to include a '+' or a '-' in your modifier value... Assuming '+'.")
-       dieRoll = "".join(["!val %roll:", numDie, "d", diceSize, "%", modifier])
-       xchat.command(" ".join(["msg", xchat.get_info("channel"), dieRoll]))
+       dieRoll = "!val %roll:" + numDie + "d" + diceSize + "%" + modifier
+       xchat.command(command + dieRoll)
 
 class SimpleWindow(Simple):
    
    def __init__(self, *args, **kwds):
        Simple.__init__(self, *args, **kwds)
        self.bindActions()
-       self.initDieValue.ChangeValue(diceCFG.get("dice", "init"))
-       self.hitDieValue.ChangeValue(diceCFG.get("dice", "hit"))
-       self.attackDieValue.ChangeValue(diceCFG.get("dice", "attack"))
+       self.initDieValue.ChangeValue(iDie)
+       self.hitDieValue.ChangeValue(hDie)
+       self.attackDieValue.ChangeValue(aDie)
    
    def bindActions(self):
        self.initButton.Bind(wx.EVT_BUTTON, self.initButtonClick)
@@ -108,66 +116,63 @@ class SimpleWindow(Simple):
    
    def attackButtonClick(self, event):
        if len(self.modifierAdd.GetValue()) == 0:
-           atkDie = diceCFG.get("dice", "attack")
-           if not "+" and "-" in atkDie:
-               roller = "".join(["!val %roll:", diceCFG.get("dice", "attack"), "%"])
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           if not "+" and "-" in aDie:
+               roller = "".join(["!val %roll:", aDie, "%"])
+               xchat.command(" ".join(["msg", chan, roller]))
            else:
                if "+" in atkDie:
-                   index = atkDie.find('+')
-               elif "-" in atkDie:
-                   index = atkDie.find('-')
-               atkDie1 = atkDie[0:index]
-               atkDie2 = atkDie[index:len(atkDie)]
+                   index = aDie.find('+')
+               elif "-" in aDie:
+                   index = aDie.find('-')
+               atkDie1 = aDie[0:index]
+               atkDie2 = aDie[index:len(aDie)]
                roller = "".join(["!val %roll:", atkDie1, "%", atkDie2])
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+               xchat.command(" ".join(["msg", chan, roller]))
        else:
            mod = self.modifierAdd.GetValue()
-           roller = "".join(["!val %roll:", diceCFG.get("dice", "attack"), "%+", mod])
-           xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           roller = "".join(["!val %roll:", aDie, "%+", mod])
+           xchat.command(" ".join(["msg", chan, roller]))
        
    def hitButtonClick(self, event):
        if len(self.modifierAdd.GetValue()) == 0:
-           hitDie = diceCFG.get("dice", "hit")
-           if not "+" and "-" in hitDie:
-               roller = "".join(["!val %roll:", diceCFG.get("dice", "hit"), "%"])
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           if not "+" and "-" in hDie:
+               roller = "".join(["!val %roll:", hDie, "%"])
+               xchat.command(" ".join(["msg", chan, roller]))
            else:
-               if "+" in hitDie:
-                   index = hitDie.find('+')
-               elif "-" in hitDie:
-                   index = hitDie.find('-')
-               hitDie1 = hitDie[0:index]
-               hitDie2 = hitDie[index:len(hitDie)]
+               if "+" in hDie:
+                   index = hDie.find('+')
+               elif "-" in hDie:
+                   index = hDie.find('-')
+               hitDie1 = hDie[0:index]
+               hitDie2 = hDie[index:len(hDie)]
                roller = "".join(["!val %roll:", hitDie1, "%", hitDie2])
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+               xchat.command(" ".join(["msg", chan, roller]))
        else:
            mod = self.modifierAdd.GetValue()
-           roller = "".join(["!val %roll:", diceCFG.get("dice", "hit"), "%+", mod])
-           xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           roller = "".join(["!val %roll:", hDie, "%+", mod])
+           xchat.command(" ".join(["msg", chan, roller]))
    
    def aboutButtonClick(self, event):
        wx.MessageBox("GarGUI is by Brian Maurer aka XVicarious \nThis is open source and shit. Give me credit if you use it.\nGargoyle is a IRC bot for RPG games written by CyberXZT", "About", wx.OK | wx.ICON_INFORMATION)
    
    def initButtonClick(self, event):
        if len(self.modifierAdd.GetValue()) == 0:
-           initDie = diceCFG.get("dice", "hit")
-           if not "+" or "-" in initDie:
-               roller = "".join(["!val %roll:", diceCFG.get("dice", "init"), "%"])
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           if not "+" or "-" in iDie:
+               roller = "".join(["!val %roll:", iDie, "%"])
+               xchat.command(" ".join(["msg", chan, roller]))
            else:
-               if "+" in initDie:
-                   index = initDie.find('+')
-               elif "-" in initDie:
-                   index = initDie.find('-')
-               initDie1 = initDie[0:index]
-               initDie2 = initDie[index:len(initDie)]
-               roller = "".join(["!val %roll:", initDie1, "%", initDie2)]
-               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+               if "+" in iDie:
+                   index = iDie.find('+')
+               elif "-" in iDie:
+                   index = iDie.find('-')
+               initDie1 = iDie[0:index]
+               initDie2 = iDie[index:len(iDie)]
+               roller = "".join(["!val %roll:", initDie1, "%", initDie2])
+               xchat.command(" ".join(["msg", chan, roller]))
        else:
            mod = self.modifierAdd.GetValue()
-           roller = "".join(["!val %roll:", diceCFG.get("dice", "init"),"%+", mod])
-           xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           roller = "".join(["!val %roll:", iDie,"%+", mod])
+           xchat.command(" ".join(["msg", chan, roller]))
        
 def showGUI(word, word_eol, userdata):
    #path = raw(path)
