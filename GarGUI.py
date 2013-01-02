@@ -24,6 +24,7 @@ aDie = diceCFG.get("dice", "attack")
 
 # Extra variables to make life easier
 command = "msg " + xchat.get_info("channel")
+v = unicode('\u039B', "unicode_escape").encode("utf8")
 
 class AdvancedWindow(Advanced):
     
@@ -74,12 +75,23 @@ class SimpleWindow(Simple):
        self.setInitDie.Bind(wx.EVT_BUTTON, self.initDieEdit)
        self.setHitDie.Bind(wx.EVT_BUTTON, self.hitDieEdit)
        self.setAttackDie.Bind(wx.EVT_BUTTON, self.hitDieEdit)
+       self.rollMisc.Bind(wx.EVT_BUTTON, self.rollMiscClick)
+   
+   def rollMiscClick(self, event):
+       numDie = self.dieCount.GetValue()
+       sizeDie = self.dieSize.GetValue()
+       dieMod = self.dieMod.GetValue()
+       if not "+" and "-" in dieMod:
+           dieMod = "+" + dieMod
+           xchat.prnt("You failed to include a '+' or a '-' in your modifier value... Assuming '+'.")
+       dieRoll = " !val %roll:" + numDie + "d" + sizeDie + "%" + dieMod
+       xchat.command(command + dieRoll)
    
    def hideSettersMeth(self, event):
-        self.frame_sizer.Hide(self.configSizer, recursive=True)
-        self.Fit()
-        self.hideSetters.Bind(wx.EVT_BUTTON, self.showSettersMeth)
-        self.hideSetters.SetLabel("v")
+       self.frame_sizer.Hide(self.configSizer, recursive=True)
+       self.Fit()
+       self.hideSetters.Bind(wx.EVT_BUTTON, self.showSettersMeth)
+       self.hideSetters.SetLabel("V")
    
    def showSettersMeth(self, event):
        try:
@@ -88,7 +100,7 @@ class SimpleWindow(Simple):
        except Exception as e:
            wx.MessageBox(str(e))
        self.hideSetters.Bind(wx.EVT_BUTTON, self.hideSettersMeth)
-       self.hideSetters.SetLabel("^")
+       self.hideSetters.SetLabel(v)
    
    def initDieEdit(self, event):
        setcfg = self.initDieValue.GetValue()
@@ -106,57 +118,45 @@ class SimpleWindow(Simple):
        xchat.command("savecfg")
    
    def attackButtonClick(self, event):
-       if len(self.modifierAdd.GetValue()) == 0:
+       try:
            if not "+" and "-" in aDie:
                roller = " !val %roll:" + aDie + "%"
                xchat.command(command + roller)
            else:
-               if "+" in atkDie:
+               if "+" in aDie:
                    index = aDie.find('+')
                elif "-" in aDie:
                    index = aDie.find('-')
                roller = " !val %roll:" + aDie[0:index] + "%" + aDie[index:len(aDie)]
                xchat.command(command + roller)
-       else:
-           mod = self.modifierAdd.GetValue()
-           roller = " !val %roll:" + aDie + "%+" + mod
-           xchat.command(command + roller)
+       except Exception as e:
+           wx.MessageBox(str(e))
        
    def hitButtonClick(self, event):
-       if len(self.modifierAdd.GetValue()) == 0:
-           if not "+" and "-" in hDie:
-               roller = " !val %roll:" + hDie + "%"
-               xchat.command(command + roller)
-           else:
-               if "+" in hDie:
-                   index = hDie.find('+')
-               elif "-" in hDie:
-                   index = hDie.find('-')
-               roller = " !val %roll:" + hDie[0:index] + "%" + hDie[index:len(hDie)]
-               xchat.command(command + roller)
+       if not "+" and "-" in hDie:
+           roller = " !val %roll:" + hDie + "%"
+           xchat.command(command + roller)
        else:
-           mod = self.modifierAdd.GetValue()
-           roller = " !val %roll:" + hDie + "%+" + mod
+           if "+" in hDie:
+               index = hDie.find('+')
+           elif "-" in hDie:
+               index = hDie.find('-')
+           roller = " !val %roll:" + hDie[0:index] + "%" + hDie[index:len(hDie)]
            xchat.command(command + roller)
    
    def aboutButtonClick(self, event):
        wx.MessageBox("GarGUI " + __module_version__ + "\n\nGarGUI is a front-end for the IRC bot \"Gargoyle\" by CyberXZT.  GarGUI attempts to make the usage of Gargoyle easier by the simplification of the !val command to simple GUI buttons.  \nModes exist in GarGUI to utilize it in different ways.  The normal GUI is the most simple having just a few button for rolling Initiative, Hit Chance, and Attack.  The \"Advanced\" GUI allows users to fully modify each roll, with the ability to have a few common dice as quick settings.\n\n GarGUI is licensed unded the GNU GPL v3.  The full terms of this license can be found in the \"LICENSE\" file in GarGUI's directory.", "About", wx.OK | wx.ICON_INFORMATION)
    
    def initButtonClick(self, event):
-       if len(self.modifierAdd.GetValue()) == 0:
-           if not "+" or "-" in iDie:
-               roller = " !val %roll:" + iDie + "%"
-               xchat.command(command + roller)
-           else:
-               if "+" in iDie:
-                   index = iDie.find('+')
-               elif "-" in iDie:
-                   index = iDie.find('-')
-               roller = " !val %roll:" + iDie[0:index] + "%" + iDie[index:len(iDie)]
-               xchat.command(command + roller)
+       if not "+" or "-" in iDie:
+           roller = " !val %roll:" + iDie + "%"
+           xchat.command(command + roller)
        else:
-           mod = self.modifierAdd.GetValue()
-           roller = " !val %roll:" + iDie + "%+" + mod
+           if "+" in iDie:
+               index = iDie.find('+')
+           elif "-" in iDie:
+               index = iDie.find('-')
+           roller = " !val %roll:" + iDie[0:index] + "%" + iDie[index:len(iDie)]
            xchat.command(command + roller)
        
 def showGUI(word, word_eol, userdata):
