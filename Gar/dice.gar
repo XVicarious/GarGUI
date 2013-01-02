@@ -1,0 +1,5 @@
+[dice]
+init = 1d21
+hit = 1d20
+attack = 2d6+2
+
