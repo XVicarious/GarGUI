@@ -64,38 +64,33 @@ class SimpleWindow(Simple):
        self.initDieValue.ChangeValue(iDie)
        self.hitDieValue.ChangeValue(hDie)
        self.attackDieValue.ChangeValue(aDie)
-   
+       
    def bindActions(self):
        self.initButton.Bind(wx.EVT_BUTTON, self.initButtonClick)
        self.hitButton.Bind(wx.EVT_BUTTON, self.hitButtonClick)
        self.attackButton.Bind(wx.EVT_BUTTON, self.attackButtonClick)
        self.aboutButton.Bind(wx.EVT_BUTTON, self.aboutButtonClick)
        self.hideSetters.Bind(wx.EVT_BUTTON, self.showSettersMeth)
-       self.setInitDie.Bind(wx.EVT_BUTTON, self.initDiceEdit)
-       self.setHitDie.Bind(wx.EVT_BUTTON, self.hitDiceEdit)
-       self.setAttackDie.Bind(wx.EVT_BUTTON, self.hitDiceEdit)
+       self.setInitDie.Bind(wx.EVT_BUTTON, self.initDieEdit)
+       self.setHitDie.Bind(wx.EVT_BUTTON, self.hitDieEdit)
+       self.setAttackDie.Bind(wx.EVT_BUTTON, self.hitDieEdit)
    
    def hideSettersMeth(self, event):
-        self.initDieValue.Hide()
-        self.setInitDie.Hide()
-        self.hitDieValue.Hide()
-        self.setHitDie.Hide()
-        self.setAttackDie.Hide()
-        self.attackDieValue.Hide()
+        self.frame_sizer.Hide(self.configSizer, recursive=True)
+        self.Fit()
         self.hideSetters.Bind(wx.EVT_BUTTON, self.showSettersMeth)
         self.hideSetters.SetLabel("v")
    
    def showSettersMeth(self, event):
-       self.initDieValue.Show()
-       self.setInitDie.Show()
-       self.hitDieValue.Show()
-       self.setHitDie.Show()
-       self.setAttackDie.Show()
-       self.attackDieValue.Show()
+       try:
+           self.frame_sizer.Show(self.configSizer, recursive=True)
+           self.Fit()
+       except Exception as e:
+           wx.MessageBox(str(e))
        self.hideSetters.Bind(wx.EVT_BUTTON, self.hideSettersMeth)
        self.hideSetters.SetLabel("^")
    
-   def initDiceEdit(self, event):
+   def initDieEdit(self, event):
        setcfg = self.initDieValue.GetValue()
        diceCFG.set("dice", "init", setcfg)
        xchat.command("savecfg")
@@ -145,7 +140,7 @@ class SimpleWindow(Simple):
            xchat.command(command + roller)
    
    def aboutButtonClick(self, event):
-       wx.MessageBox("", "About", wx.OK | wx.ICON_INFORMATION)
+       wx.MessageBox("GarGUI " + __module_version__ + "\n\nGarGUI is a front-end for the IRC bot \"Gargoyle\" by CyberXZT.  GarGUI attempts to make the usage of Gargoyle easier by the simplification of the !val command to simple GUI buttons.  \nModes exist in GarGUI to utilize it in different ways.  The normal GUI is the most simple having just a few button for rolling Initiative, Hit Chance, and Attack.  The \"Advanced\" GUI allows users to fully modify each roll, with the ability to have a few common dice as quick settings.\n\n GarGUI is licensed unded the GNU GPL v3.  The full terms of this license can be found in the \"LICENSE\" file in GarGUI's directory.", "About", wx.OK | wx.ICON_INFORMATION)
    
    def initButtonClick(self, event):
        if len(self.modifierAdd.GetValue()) == 0:
