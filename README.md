@@ -1,7 +1,7 @@
 GarGUI v1.0.0
 ----------------
-
 Written by: Brian Maurer a.k.a XVicarious
+----------------
 
 GarGUI requires Python 2.7 and wxPython 2.8
 
