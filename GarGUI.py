@@ -151,8 +151,19 @@ class SimpleWindow(Simple):
    
    def initButtonClick(self, event):
        if len(self.modifierAdd.GetValue()) == 0:
-           roller = "".join(["!val %roll:", diceCFG.get("dice", "init"), "%"])
-           xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           initDie = diceCFG.get("dice", "hit")
+           if not "+" or "-" in initDie:
+               roller = "".join(["!val %roll:", diceCFG.get("dice", "init"), "%"])
+               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
+           else:
+               if "+" in initDie:
+                   index = initDie.find('+')
+               elif "-" in initDie:
+                   index = initDie.find('-')
+               initDie1 = initDie[0:index]
+               initDie2 = initDie[index:len(initDie)]
+               roller = "".join(["!val %roll:", initDie1, "%", initDie2)]
+               xchat.command(" ".join(["msg", xchat.get_info("channel"), roller]))
        else:
            mod = self.modifierAdd.GetValue()
            roller = "".join(["!val %roll:", diceCFG.get("dice", "init"),"%+", mod])
