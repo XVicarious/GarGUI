@@ -2,6 +2,8 @@ GarGUI v1.0.0
 By: Brian Maurer
 ----------------
 
+GarGUI requires Python 2.7 and wxPython 2.8
+
 GarGUI is a simple GUI written in Python (with wxPython) designed to simplify CyberXZT's overly complicated IRC bot for RPGs, called Gargoyle.  GarGUI takes Gargoyle's !val command and turns it into cake.
 Below is a quick overview of each file of GarGUI.
 
